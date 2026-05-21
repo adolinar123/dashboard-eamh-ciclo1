@@ -184,7 +184,7 @@ def kpi_cards(df_f: pd.DataFrame):
 # ── TABLA DE ESTUDIANTES ──────────────────────────────────────────────────────
 
 def tabla_estudiantes(df_f: pd.DataFrame):
-    cols_show = ["Nombre", "Grado", "Salon", "Edad",
+    cols_show = ["Nombre", "Grado", "Salon",
                  "Motivación", "Habilidades", "Estilos",
                  "Socioemocional 13", "Socioemocional 14", "Socioemocional 15"]
     df_show = df_f[cols_show].copy()
@@ -215,7 +215,7 @@ def detalle_estudiante(df_f: pd.DataFrame, casos: dict):
     info_cols = st.columns(3)
     info_cols[0].markdown(f"**Institución:** {row['Institución']}")
     info_cols[1].markdown(f"**Grado:** {row['Grado']}° – Grupo {row['Salon']}")
-    info_cols[2].markdown(f"**Edad:** {row['Edad']}")
+    info_cols[2].markdown(f"**Grupo:** {row['Salon']}")
 
     st.divider()
     for clave, etiqueta in COMPONENTES:
