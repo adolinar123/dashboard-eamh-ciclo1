@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Dashboard Exploratorio – Cuestionario Diagnóstico EAMH
+Informe Interactivo Diagnóstico EAMH – Ciclo 1
 Ciclo 1 · I.E. Felipe de Restrepo
 """
 
@@ -15,7 +15,7 @@ import streamlit as st
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Dashboard EAMH – Ciclo 1",
+    page_title="Informe Interactivo Diagnóstico EAMH – Ciclo 1",
     page_icon="📊",
     layout="centered",
 )
@@ -266,7 +266,7 @@ def comparativo_grados(df: pd.DataFrame, componente: str):
 # ── APP PRINCIPAL ─────────────────────────────────────────────────────────────
 
 def main():
-    st.title("📊 Dashboard Exploratorio – Cuestionario Diagnóstico EAMH")
+    st.title("📊 Informe Interactivo Diagnóstico EAMH – Ciclo 1")
     st.caption("Ciclo 1 · I.E. Felipe de Restrepo · Aprendizaje Autónomo")
     st.divider()
 
