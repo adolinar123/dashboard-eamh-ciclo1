@@ -20,9 +20,66 @@ st.set_page_config(
     layout="centered",
 )
 
-BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
-CSV_CASOS = os.path.join(BASE_DIR, "Caos de respuesta Cuestionario Ciclo 1.csv")
-CSV_TABUL = os.path.join(BASE_DIR, "Tabulación Felipe(Felipe de Restrepo).csv")
+BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
+CSV_CASOS  = os.path.join(BASE_DIR, "Caos de respuesta Cuestionario Ciclo 1.csv")
+CSV_TABUL  = os.path.join(BASE_DIR, "Tabulación Felipe(Felipe de Restrepo).csv")
+ASSETS_DIR = os.path.join(BASE_DIR, "assets")
+
+# ── CSS ───────────────────────────────────────────────────────────────────────
+st.markdown("""
+<style>
+/* Encabezado principal */
+.header-banner {
+    background: linear-gradient(135deg, #0D47A1 0%, #1565C0 60%, #1976D2 100%);
+    border-radius: 12px;
+    padding: 24px 28px 20px 28px;
+    margin-bottom: 24px;
+    color: white;
+}
+.header-banner h1 {
+    color: white !important;
+    font-size: 1.6rem;
+    margin: 0 0 4px 0;
+}
+.header-banner p {
+    color: #BBDEFB;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Métricas */
+[data-testid="metric-container"] {
+    background: white;
+    border: 1.5px solid #90CAF9;
+    border-radius: 10px;
+    padding: 14px 18px;
+}
+[data-testid="metric-container"] label {
+    color: #1565C0 !important;
+    font-weight: 600;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background-color: #1A237E !important;
+}
+[data-testid="stSidebar"] * {
+    color: #E3F2FD !important;
+}
+[data-testid="stSidebar"] .stMultiSelect [data-baseweb="tag"] {
+    background-color: #1565C0 !important;
+}
+
+/* Tabs */
+[data-testid="stTab"] {
+    font-weight: 600;
+    color: #1565C0;
+}
+
+/* Divider */
+hr { border-color: #BBDEFB !important; }
+</style>
+""", unsafe_allow_html=True)
 
 PROFILE_COLORS = {
     "Orientación motivacional extrínseco":              "#E65100",
@@ -133,11 +190,11 @@ def chart_barras(series: pd.Series, titulo: str):
         xaxis_title="%", yaxis_title="",
         margin=dict(l=20, r=30, t=60, b=20),
         height=max(250, len(counts) * 65 + 100),
-        plot_bgcolor="white",
+        plot_bgcolor="#F0F5FF",
         title=dict(font=dict(size=16)),
         yaxis=dict(automargin=True, tickfont=dict(size=12)),
     )
-    fig.update_xaxes(range=[0, 125], showgrid=True, gridcolor="#e0e0e0")
+    fig.update_xaxes(range=[0, 125], showgrid=True, gridcolor="#BBDEFB")
     return fig
 
 
@@ -255,19 +312,40 @@ def comparativo_grados(df: pd.DataFrame, componente: str):
     )
     fig.update_layout(
         height=440, margin=dict(l=20, r=20, t=60, b=60),
-        plot_bgcolor="white", yaxis_title="%",
+        plot_bgcolor="#F0F5FF", yaxis_title="%",
         title=dict(font=dict(size=16)),
         legend=dict(orientation="h", x=0.5, xanchor="center", y=-0.22, font_size=10),
     )
-    fig.update_yaxes(range=[0, 105], showgrid=True, gridcolor="#e0e0e0")
+    fig.update_yaxes(range=[0, 105], showgrid=True, gridcolor="#BBDEFB")
     return fig
 
 
 # ── APP PRINCIPAL ─────────────────────────────────────────────────────────────
 
 def main():
-    st.title("📊 Informe Interactivo Diagnóstico EAMH – Ciclo 1")
-    st.caption("Ciclo 1 · I.E. Felipe de Restrepo · Aprendizaje Autónomo")
+    # ── Encabezado con logos opcionales ──────────────────────────────────────
+    logo_izq = os.path.join(ASSETS_DIR, "logo_izquierda.png")
+    logo_der = os.path.join(ASSETS_DIR, "logo_derecha.png")
+
+    tiene_logos = os.path.exists(logo_izq) or os.path.exists(logo_der)
+    if tiene_logos:
+        col_li, col_titulo, col_ld = st.columns([1, 5, 1])
+        if os.path.exists(logo_izq):
+            col_li.image(logo_izq, use_container_width=True)
+        if os.path.exists(logo_der):
+            col_ld.image(logo_der, use_container_width=True)
+        with col_titulo:
+            st.markdown("""
+            <div class="header-banner">
+                <h1>📊 Informe Interactivo Diagnóstico EAMH</h1>
+                <p>Ciclo 1 &nbsp;·&nbsp; I.E. Felipe de Restrepo &nbsp;·&nbsp; Aprendizaje Autónomo</p>
+            </div>""", unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="header-banner">
+            <h1>📊 Informe Interactivo Diagnóstico EAMH</h1>
+            <p>Ciclo 1 &nbsp;·&nbsp; I.E. Felipe de Restrepo &nbsp;·&nbsp; Aprendizaje Autónomo</p>
+        </div>""", unsafe_allow_html=True)
     st.divider()
 
     df_full = build_data()
