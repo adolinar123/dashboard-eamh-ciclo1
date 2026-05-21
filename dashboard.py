@@ -338,9 +338,9 @@ def main():
             </div>""", unsafe_allow_html=True)
         with col_logos:
             if os.path.exists(logo_izq):
-                st.image(logo_izq, use_container_width=True)
+                st.image(logo_izq, width=120)
             if os.path.exists(logo_der):
-                st.image(logo_der, use_container_width=True)
+                st.image(logo_der, width=120)
     else:
         st.markdown("""
         <div class="header-banner">
