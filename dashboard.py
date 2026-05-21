@@ -329,17 +329,18 @@ def main():
 
     tiene_logos = os.path.exists(logo_izq) or os.path.exists(logo_der)
     if tiene_logos:
-        col_li, col_titulo, col_ld = st.columns([1, 5, 1])
-        if os.path.exists(logo_izq):
-            col_li.image(logo_izq, use_container_width=True)
-        if os.path.exists(logo_der):
-            col_ld.image(logo_der, use_container_width=True)
+        col_titulo, col_logos = st.columns([5, 2])
         with col_titulo:
             st.markdown("""
             <div class="header-banner">
                 <h1>📊 Informe Interactivo Diagnóstico EAMH</h1>
                 <p>Ciclo 1 &nbsp;·&nbsp; I.E. Felipe de Restrepo &nbsp;·&nbsp; Aprendizaje Autónomo</p>
             </div>""", unsafe_allow_html=True)
+        with col_logos:
+            if os.path.exists(logo_izq):
+                st.image(logo_izq, use_container_width=True)
+            if os.path.exists(logo_der):
+                st.image(logo_der, use_container_width=True)
     else:
         st.markdown("""
         <div class="header-banner">
