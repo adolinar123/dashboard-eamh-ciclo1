@@ -20,10 +20,10 @@ st.set_page_config(
     layout="centered",
 )
 
-BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
-CSV_CASOS  = os.path.join(BASE_DIR, "Caos de respuesta Cuestionario Ciclo 1.csv")
-CSV_TABUL  = os.path.join(BASE_DIR, "Tabulación Felipe(Felipe de Restrepo).csv")
-ASSETS_DIR = os.path.join(BASE_DIR, "assets")
+BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
+CSV_CASOS   = os.path.join(BASE_DIR, "Caos de respuesta Cuestionario Ciclo 1.csv")
+CSV_TABUL   = os.path.join(BASE_DIR, "datos_dashboard.csv")
+ASSETS_DIR  = os.path.join(BASE_DIR, "assets")
 
 # ── CSS ───────────────────────────────────────────────────────────────────────
 st.markdown("""
