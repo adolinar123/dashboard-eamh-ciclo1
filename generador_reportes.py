@@ -62,6 +62,7 @@ COMP_COLORS = {
 }
 
 PROFILE_COLORS = {
+    "Sin clasificar":                                    "#B0BEC5",
     "Orientación motivacional extrínseco":              "#E65100",
     "Orientación motivacional intrínseca":              "#2E7D32",
     "Orientación motivacional mixta o situada":         "#F9A825",
@@ -360,15 +361,16 @@ def seccion_componente(nombre: str, counter: Counter, total: int,
         story.append(Paragraph(descripcion, styles["cuerpo"]))
         story.append(Spacer(1, 6))
     if counter and sum(counter.values()) > 0:
+        total_clasificados = sum(counter.values())
         chart_path = os.path.join(tmp_dir, f"chart_{comp_key.replace(' ', '_')}.png")
         make_bar_chart(counter, "", chart_path,
                        width=14, height=max(3, len(counter) * 1.1 + 1.5),
-                       total=total)
+                       total=total_clasificados)
         if os.path.exists(chart_path):
             story.append(Image(chart_path, width=16 * cm,
                                height=max(4, len(counter) * 1.5 + 2) * cm))
             story.append(Spacer(1, 4))
-        story.append(tabla_distribucion(counter, styles, total))
+        story.append(tabla_distribucion(counter, styles, total_clasificados))
     else:
         story.append(Paragraph("Sin datos disponibles.", styles["cuerpo"]))
     return story
@@ -726,7 +728,7 @@ def report_agregado(df_grupo: pd.DataFrame, todos_perfiles: list,
     # Por componente
     for clave, (titulo_comp, desc_comp) in COMP_DESCRIPTIONS.items():
         counter = Counter(p[clave][0] for p in todos_perfiles
-                          if p.get(clave) and p[clave][0] != "Sin clasificar")
+                          if p.get(clave))
         story += seccion_componente(titulo_comp, counter, total,
                                      styles, tmp_dir, clave, desc_comp)
 
@@ -751,27 +753,28 @@ def report_agregado(df_grupo: pd.DataFrame, todos_perfiles: list,
     ]
     table_rows = [header_row]
     for (_, row), perfiles in zip(df_grupo.iterrows(), todos_perfiles):
-        def sht(s, n=22):
+        def sht(s, n=30):
             return s[:n] + "…" if len(s) > n else s
         table_rows.append([
-            Paragraph(sht(row["Nombre"], 28), styles["label_tabla"]),
-            Paragraph(f"{row['Grado']}°",     styles["label_tabla"]),
-            Paragraph(row["Salon"],            styles["label_tabla"]),
-            Paragraph(sht(perfiles["Motivación"][0]),  styles["label_tabla"]),
-            Paragraph(sht(perfiles["Habilidades"][0]), styles["label_tabla"]),
-            Paragraph(sht(perfiles["Estilos"][0]),     styles["label_tabla"]),
+            Paragraph(sht(row["Nombre"]), styles["label_tabla"]),
+            Paragraph(f"{row['Grado']}°", styles["label_tabla"]),
+            Paragraph(row["Salon"],       styles["label_tabla"]),
+            Paragraph(perfiles["Motivación"][0],  styles["label_tabla"]),
+            Paragraph(perfiles["Habilidades"][0], styles["label_tabla"]),
+            Paragraph(perfiles["Estilos"][0],     styles["label_tabla"]),
         ])
 
-    t = Table(table_rows, colWidths=[5.5*cm, 1.5*cm, 1*cm, 4*cm, 4*cm, 4*cm])
+    t = Table(table_rows, colWidths=[4.5*cm, 1.2*cm, 0.8*cm, 3.9*cm, 3.9*cm, 3.7*cm])
     t.setStyle(TableStyle([
         ("BACKGROUND",    (0, 0), (-1, 0), C_AZUL),
         ("TEXTCOLOR",     (0, 0), (-1, 0), colors.white),
         ("ROWBACKGROUNDS",(0, 1), (-1, -1), [colors.white, C_GRIS]),
         ("GRID",          (0, 0), (-1, -1), 0.3, C_BORDE),
-        ("TOPPADDING",    (0, 0), (-1, -1), 4),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING",    (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
         ("LEFTPADDING",   (0, 0), (-1, -1), 4),
         ("FONTSIZE",      (0, 0), (-1, -1), 8),
+        ("VALIGN",        (0, 0), (-1, -1), "TOP"),
     ]))
     story.append(t)
 

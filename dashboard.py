@@ -83,6 +83,7 @@ hr { border-color: #BBDEFB !important; }
 """, unsafe_allow_html=True)
 
 PROFILE_COLORS = {
+    "Sin clasificar":                                    "#B0BEC5",
     "Orientación motivacional extrínseco":              "#E65100",
     "Orientación motivacional intrínseca":              "#2E7D32",
     "Orientación motivacional mixta o situada":         "#F9A825",
@@ -183,7 +184,7 @@ def build_data():
 # ── GRÁFICAS ──────────────────────────────────────────────────────────────────
 
 def chart_barras(series: pd.Series, titulo: str):
-    counts = series[series != "Sin clasificar"].value_counts().reset_index()
+    counts = series.value_counts().reset_index()
     counts.columns = ["Perfil", "n"]
     total = counts["n"].sum()
     counts["%"] = (counts["n"] / total * 100).round(1)
@@ -210,7 +211,7 @@ def chart_barras(series: pd.Series, titulo: str):
 
 
 def chart_dona(series: pd.Series, titulo: str):
-    counts = series[series != "Sin clasificar"].value_counts().reset_index()
+    counts = series.value_counts().reset_index()
     counts.columns = ["Perfil", "n"]
     colors = [PROFILE_COLORS.get(p, "#90A4AE") for p in counts["Perfil"]]
     fig = go.Figure(go.Pie(
@@ -244,11 +245,12 @@ def _ctx_str(df_f: pd.DataFrame) -> str:
 
 
 def analisis_descriptivo(serie: pd.Series, comp_key: str, df_f: pd.DataFrame) -> str:
-    serie = serie[serie != "Sin clasificar"]
-    total = len(serie)
+    n_sin = (serie == "Sin clasificar").sum()
+    serie_cl = serie[serie != "Sin clasificar"]
+    total = len(serie_cl)
     if total == 0:
-        return ""
-    counts = serie.value_counts()
+        return "Sin datos clasificados para este filtro."
+    counts = serie_cl.value_counts()
     top_perfil = counts.index[0]
     top_n = int(counts.iloc[0])
     top_pct = top_n / total * 100
@@ -368,7 +370,9 @@ def analisis_descriptivo(serie: pd.Series, comp_key: str, df_f: pd.DataFrame) ->
     else:
         detalle = f"el perfil predominante es **{top_perfil}** con el **{top_pct:.0f}%** ({top_n} estudiantes)."
 
-    return intro + detalle
+    nota_sin = (f" *(Nota: {n_sin} estudiante(s) aparecen como Sin clasificar por respuestas incompletas "
+                f"en el instrumento.)*") if n_sin > 0 else ""
+    return intro + detalle + nota_sin
 
 
 # ── MÉTRICAS KPI ──────────────────────────────────────────────────────────────
