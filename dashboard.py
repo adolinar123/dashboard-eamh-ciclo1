@@ -228,6 +228,148 @@ def chart_dona(series: pd.Series, titulo: str):
     return fig
 
 
+# ── ANÁLISIS DESCRIPTIVO ──────────────────────────────────────────────────────
+
+def _ctx_str(df_f: pd.DataFrame) -> str:
+    instituciones = sorted(df_f["Institución"].unique())
+    grados = sorted(df_f["Grado"].unique(), key=lambda x: int(x) if x.isdigit() else x)
+    inst = f"**{instituciones[0]}**" if len(instituciones) == 1 else f"las **{len(instituciones)} instituciones** seleccionadas"
+    if len(grados) == 1:
+        grado = f"grado **{grados[0]}°**"
+    elif len(grados) == 3:
+        grado = "todos los grados (1°, 2°, 3°)"
+    else:
+        grado = f"grados **{', '.join(g+'°' for g in grados)}**"
+    return inst, grado
+
+
+def analisis_descriptivo(serie: pd.Series, comp_key: str, df_f: pd.DataFrame) -> str:
+    total = len(serie)
+    if total == 0:
+        return ""
+    counts = serie.value_counts()
+    top_perfil = counts.index[0]
+    top_n = int(counts.iloc[0])
+    top_pct = top_n / total * 100
+    ctx_inst, ctx_grado = _ctx_str(df_f)
+    intro = f"De los **{total} estudiantes** en {ctx_inst}, {ctx_grado}: "
+
+    if comp_key == "Motivación":
+        if "intrínseca" in top_perfil:
+            detalle = (
+                f"el **{top_pct:.0f}%** ({top_n}) presenta **orientación motivacional intrínseca**. "
+                f"El aprendizaje está impulsado por curiosidad e interés genuino, lo que es una fortaleza "
+                f"significativa para el aprendizaje autónomo. Se recomienda ofrecer proyectos con autonomía, "
+                f"elección y retos que canalicen esta motivación interna."
+            )
+        elif "extrínseco" in top_perfil:
+            detalle = (
+                f"el **{top_pct:.0f}%** ({top_n}) muestra **orientación motivacional extrínseca**. "
+                f"El compromiso académico está sostenido principalmente por notas o reconocimiento externo. "
+                f"Se recomienda conectar los contenidos con intereses propios del estudiante y valorar el proceso, "
+                f"no solo el resultado."
+            )
+        else:
+            detalle = (
+                f"el **{top_pct:.0f}%** ({top_n}) tiene **motivación mixta o situada**, "
+                f"respondiendo a motivadores internos y externos según el contexto. "
+                f"Variar los ambientes y formatos de aprendizaje favorece el aprovechamiento de ambas fuentes."
+            )
+
+    elif comp_key == "Habilidades":
+        if "alta confianza" in top_perfil:
+            detalle = (
+                f"el **{top_pct:.0f}%** ({top_n}) presenta **alta autopercepción de confianza cognitiva**. "
+                f"Se perciben como aprendices capaces y seguros, lo que favorece la autorregulación. "
+                f"Pueden beneficiarse de retos académicos más complejos y roles de liderazgo colaborativo."
+            )
+        elif "diferenciación" in top_perfil:
+            detalle = (
+                f"el **{top_pct:.0f}%** ({top_n}) está **en proceso de diferenciación cognitiva**, "
+                f"construyendo su identidad como aprendices. "
+                f"Se recomienda acompañamiento metacognitivo para identificar fortalezas propias "
+                f"y desarrollar estrategias de aprendizaje personalizadas."
+            )
+        else:
+            detalle = (
+                f"el **{top_pct:.0f}%** ({top_n}) percibe **necesidad de regulación externa**. "
+                f"Es prioritario diseñar andamiajes pedagógicos claros, instrucciones paso a paso "
+                f"y rutinas estructuradas que fortalezcan progresivamente la autonomía cognitiva."
+            )
+
+    elif comp_key == "Estilos":
+        if "Visual" in top_perfil:
+            detalle = (
+                f"el canal predominante es el **visual** con el **{top_pct:.0f}%** ({top_n}). "
+                f"Se recomienda privilegiar gráficos, infografías, esquemas, mapas conceptuales "
+                f"y presentaciones visuales en materiales y actividades."
+            )
+        elif "Auditivo" in top_perfil:
+            detalle = (
+                f"el **{top_pct:.0f}%** ({top_n}) prefiere el canal **auditivo**. "
+                f"Se recomienda incorporar explicaciones orales, discusiones grupales, "
+                f"podcasts educativos y actividades de escucha activa."
+            )
+        else:
+            detalle = (
+                f"el **{top_pct:.0f}%** ({top_n}) prefiere el canal **kinestésico**. "
+                f"Se recomienda diseñar actividades manipulativas, experimentales y de aprendizaje activo "
+                f"que favorezcan la comprensión a través de la experiencia directa."
+            )
+
+    elif comp_key == "Socioemocional 13":
+        if "cooperativo" in top_perfil:
+            detalle = (
+                f"el **{top_pct:.0f}%** ({top_n}) prefiere el **aprendizaje cooperativo**. "
+                f"El grupo tiene alta disposición social. Se recomienda potenciar trabajo en equipo, "
+                f"aprendizaje entre pares y proyectos colaborativos."
+            )
+        else:
+            detalle = (
+                f"el **{top_pct:.0f}%** ({top_n}) prefiere el **aprendizaje individual**. "
+                f"Se recomienda diversificar modalidades de trabajo e introducir gradualmente "
+                f"dinámicas colaborativas para ampliar el repertorio social del estudiante."
+            )
+
+    elif comp_key == "Socioemocional 14":
+        if "autoconfianza" in top_perfil.lower() or "confianza" in top_perfil.lower():
+            detalle = (
+                f"el **{top_pct:.0f}%** ({top_n}) percibe **autoconfianza ante el desafío académico**. "
+                f"Este grupo afronta los retos con seguridad. Se puede aprovechar con niveles de dificultad "
+                f"progresivos y actividades de resolución de problemas complejos."
+            )
+        else:
+            detalle = (
+                f"el **{top_pct:.0f}%** ({top_n}) percibe **vulnerabilidad ante el desafío académico**. "
+                f"Se recomienda diseñar andamiajes graduales, retroalimentación positiva y estrategias "
+                f"que fortalezcan la resiliencia y la confianza académica."
+            )
+
+    elif comp_key == "Socioemocional 15":
+        n_pos = sum(v for k, v in counts.items()
+                    if "muy buena" in k or ("buena" in k and "muy" not in k))
+        pct_pos = n_pos / total * 100
+        n_des = int(counts.get("Vinculación afectiva escolar desfavorable", 0))
+        pct_des = n_des / total * 100
+        if pct_pos >= 60:
+            detalle = (
+                f"el **{pct_pos:.0f}%** ({n_pos}) reporta **vinculación afectiva escolar positiva** "
+                f"(buena o muy buena). Este factor protector favorece la permanencia y el bienestar escolar. "
+                f"Se recomienda mantener el clima institucional y fortalecer el vínculo docente-estudiante."
+            )
+        else:
+            detalle = (
+                f"se identifica una **señal de alerta**: el **{pct_des:.0f}%** ({n_des}) presenta "
+                f"**vinculación afectiva escolar desfavorable**. "
+                f"Se requiere intervención prioritaria en clima de aula, estrategias de acogida "
+                f"y fortalecimiento del sentido de pertenencia institucional."
+            )
+    else:
+        detalle = f"el perfil predominante es **{top_perfil}** con el **{top_pct:.0f}%** ({top_n} estudiantes)."
+
+    return intro + detalle
+
+
 # ── MÉTRICAS KPI ──────────────────────────────────────────────────────────────
 
 def kpi_cards(df_f: pd.DataFrame):
@@ -421,6 +563,7 @@ def main():
                 chart_dona(df_f[clave], nombre),
                 use_container_width=True,
             )
+            st.info(analisis_descriptivo(df_f[clave], clave, df_f))
             st.divider()
 
         st.subheader("Dimensión socioemocional")
@@ -435,6 +578,7 @@ def main():
                 chart_dona(df_f[clave], etiq),
                 use_container_width=True,
             )
+            st.info(analisis_descriptivo(df_f[clave], clave, df_f))
             st.divider()
 
     # ── Tab 2: Por componente ─────────────────────────────────────────────────
@@ -448,6 +592,7 @@ def main():
             chart_barras(df_f[clave_sel], etiq_sel),
             use_container_width=True,
         )
+        st.info(analisis_descriptivo(df_f[clave_sel], clave_sel, df_f))
         st.divider()
         cnt = df_f[clave_sel].value_counts().reset_index()
         cnt.columns = ["Perfil", "n"]
