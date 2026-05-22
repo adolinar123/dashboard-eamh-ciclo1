@@ -183,7 +183,7 @@ def build_data():
 # ── GRÁFICAS ──────────────────────────────────────────────────────────────────
 
 def chart_barras(series: pd.Series, titulo: str):
-    counts = series.value_counts().reset_index()
+    counts = series[series != "Sin clasificar"].value_counts().reset_index()
     counts.columns = ["Perfil", "n"]
     total = counts["n"].sum()
     counts["%"] = (counts["n"] / total * 100).round(1)
@@ -210,7 +210,7 @@ def chart_barras(series: pd.Series, titulo: str):
 
 
 def chart_dona(series: pd.Series, titulo: str):
-    counts = series.value_counts().reset_index()
+    counts = series[series != "Sin clasificar"].value_counts().reset_index()
     counts.columns = ["Perfil", "n"]
     colors = [PROFILE_COLORS.get(p, "#90A4AE") for p in counts["Perfil"]]
     fig = go.Figure(go.Pie(
@@ -244,6 +244,7 @@ def _ctx_str(df_f: pd.DataFrame) -> str:
 
 
 def analisis_descriptivo(serie: pd.Series, comp_key: str, df_f: pd.DataFrame) -> str:
+    serie = serie[serie != "Sin clasificar"]
     total = len(serie)
     if total == 0:
         return ""
