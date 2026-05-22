@@ -174,6 +174,8 @@ def clasificar(row, casos):
 def build_data():
     casos = load_casos()
     df    = load_df()
+    df = df.reset_index(drop=True)
+    df["Nombre"] = [f"Estudiante {i+1:03d}" for i in range(len(df))]
     perfiles = [clasificar(row, casos) for _, row in df.iterrows()]
     for key, _ in COMPONENTES:
         df[key] = [p[key][0] for p in perfiles]
