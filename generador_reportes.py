@@ -43,6 +43,7 @@ LOGO_DER = os.path.join(ASSETS_DIR, "logo_derecha.png")
 # ── PALETA ────────────────────────────────────────────────────────────────────
 C_AZUL     = colors.HexColor("#1A3A6B")
 C_AZUL_CLR = colors.HexColor("#1565C0")
+C_CIELO    = colors.HexColor("#4A9FD4")
 C_VERDE    = colors.HexColor("#2E7D32")
 C_NARANJA  = colors.HexColor("#E65100")
 C_AMARILLO = colors.HexColor("#F9A825")
@@ -216,12 +217,12 @@ def clasificar_estudiante(row: pd.Series, casos: dict) -> dict:
 # ── GRÁFICAS ──────────────────────────────────────────────────────────────────
 
 def make_bar_chart(counter: Counter, title: str, filename: str,
-                   width=14, height=4) -> str:
+                   width=14, height=4, total: int = None) -> str:
     if not counter:
         return None
     labels = list(counter.keys())
     values = list(counter.values())
-    total  = sum(values)
+    total  = total if total is not None else sum(values)
     pcts   = [v / total * 100 for v in values]
     bar_colors = [PROFILE_COLORS.get(l, "#90A4AE") for l in labels]
     short_labels = [l if len(l) <= 42 else l[:39] + "..." for l in labels]
@@ -361,7 +362,8 @@ def seccion_componente(nombre: str, counter: Counter, total: int,
     if counter and sum(counter.values()) > 0:
         chart_path = os.path.join(tmp_dir, f"chart_{comp_key.replace(' ', '_')}.png")
         make_bar_chart(counter, "", chart_path,
-                       width=14, height=max(3, len(counter) * 1.1 + 1.5))
+                       width=14, height=max(3, len(counter) * 1.1 + 1.5),
+                       total=total)
         if os.path.exists(chart_path):
             story.append(Image(chart_path, width=16 * cm,
                                height=max(4, len(counter) * 1.5 + 2) * cm))
@@ -518,8 +520,8 @@ def on_page(canvas, doc, nivel_texto: str):
     canvas.saveState()
     w, h = A4
 
-    # Barra superior azul
-    canvas.setFillColor(C_AZUL)
+    # Barra superior azul cielo
+    canvas.setFillColor(C_CIELO)
     canvas.rect(0, h - 1.8 * cm, w, 1.8 * cm, fill=1, stroke=0)
 
     # Logo izquierda
@@ -552,7 +554,7 @@ def on_page(canvas, doc, nivel_texto: str):
     canvas.rect(0, 0, w, 0.9 * cm, fill=1, stroke=0)
     canvas.setFillColor(colors.HexColor("#757575"))
     canvas.setFont("Helvetica", 7)
-    canvas.drawString(1 * cm, 0.32 * cm, "Documento de uso interno | Ciclo 1 · 2025")
+    canvas.drawString(1 * cm, 0.32 * cm, "Documento de uso interno | Ciclo 1 · 2026")
     canvas.drawRightString(w - 1 * cm, 0.32 * cm, f"Pág. {doc.page}")
     canvas.restoreState()
 
@@ -618,6 +620,7 @@ def report_estudiante(row: pd.Series, perfiles: dict, styles: dict,
     story.append(ficha_meta([
         ("Estudiante",  f"<b>{nombre}</b>"),
         ("Institución", inst),
+        ("Ciclo",       "1 (1°, 2°, 3°)"),
         ("Grado",       f"{grado}°"),
         ("Grupo",       salon),
         ("Edad",        str(edad)),
@@ -819,7 +822,8 @@ def generar_todos(verbose=True):
                         titulo="Reporte Institucional de Diagnóstico",
                         subtitulo=inst_name, nivel_txt="Reporte Institucional",
                         out_path=out_inst, tmp_dir=tmp_dir, styles=styles,
-                        meta_extra=[("Institución", inst_name)],
+                        meta_extra=[("Institución", inst_name),
+                                    ("Ciclo", "1 (1°, 2°, 3°)")],
                         con_conclusion=True)
         if verbose:
             print(f"  ✓ Institucional")
@@ -842,6 +846,7 @@ def generar_todos(verbose=True):
                             subtitulo=inst_name, nivel_txt=label_g,
                             out_path=out_grado, tmp_dir=tmp_dir, styles=styles,
                             meta_extra=[("Institución", inst_name),
+                                        ("Ciclo", "1 (1°, 2°, 3°)"),
                                         ("Grado", f"{grado}°")],
                             con_conclusion=True)
             if verbose:
@@ -866,6 +871,7 @@ def generar_todos(verbose=True):
                                 subtitulo=inst_name, nivel_txt=label_s,
                                 out_path=out_salon, tmp_dir=tmp_dir, styles=styles,
                                 meta_extra=[("Institución", inst_name),
+                                            ("Ciclo", "1 (1°, 2°, 3°)"),
                                             ("Grado", f"{grado}°"),
                                             ("Grupo", salon)],
                                 con_conclusion=False)

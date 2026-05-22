@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
 Informe Interactivo Diagnóstico EAMH – Ciclo 1
-Ciclo 1 · I.E. Felipe de Restrepo
+Ciclo 1 · Múltiples Instituciones
 """
 
 import os
 import csv
+import glob
 from collections import defaultdict, Counter
 
 import pandas as pd
@@ -22,7 +23,7 @@ st.set_page_config(
 
 BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
 CSV_CASOS   = os.path.join(BASE_DIR, "Caos de respuesta Cuestionario Ciclo 1.csv")
-CSV_TABUL   = os.path.join(BASE_DIR, "datos_dashboard.csv")
+CSV_FINALES = sorted(glob.glob(os.path.join(BASE_DIR, "Tabulación * FINAL.csv")))
 ASSETS_DIR  = os.path.join(BASE_DIR, "assets")
 
 # ── CSS ───────────────────────────────────────────────────────────────────────
@@ -130,13 +131,23 @@ def load_casos():
 
 @st.cache_data
 def load_df():
-    df = pd.read_csv(CSV_TABUL, sep=";", encoding="utf-8-sig", dtype=str)
-    df.columns = [c.strip() for c in df.columns]
-    df["Grado"]  = df["Grupo"].apply(lambda x: x.split(";")[0].strip() if ";" in x else x.strip())
-    df["Salon"]  = df["Grupo"].apply(lambda x: x.split(";")[1].strip() if ";" in x else "1")
+    dfs = []
+    for csv_path in CSV_FINALES:
+        tmp = pd.read_csv(csv_path, sep=";", encoding="utf-8-sig", dtype=str)
+        tmp.columns = [c.strip() for c in tmp.columns]
+        tmp = tmp.dropna(subset=["Institución", "Grupo"])
+        tmp = tmp[tmp["Institución"].str.strip() != ""]
+        dfs.append(tmp)
+    df = pd.concat(dfs, ignore_index=True)
+    df["Grado"]  = df["Grupo"].apply(lambda x: x.split(";")[0].strip() if ";" in str(x) else str(x).strip())
+    df["Salon"]  = df["Grupo"].apply(lambda x: x.split(";")[1].strip() if ";" in str(x) else "1")
     df["Nombre"] = df["Nombre"].str.strip()
+    df["Institución"] = df["Institución"].str.strip()
     for col in [f"P{i}" for i in range(1, 16)]:
-        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
+        else:
+            df[col] = 0
     return df
 
 
@@ -334,7 +345,7 @@ def main():
             st.markdown("""
             <div class="header-banner">
                 <h1>📊 Informe Interactivo Diagnóstico EAMH</h1>
-                <p>Ciclo 1 &nbsp;·&nbsp; I.E. Felipe de Restrepo &nbsp;·&nbsp; Aprendizaje Autónomo</p>
+                <p>Ciclo 1 &nbsp;·&nbsp; Múltiples Instituciones &nbsp;·&nbsp; Aprendizaje Autónomo</p>
             </div>""", unsafe_allow_html=True)
         with col_logos:
             if os.path.exists(logo_izq):
@@ -345,7 +356,7 @@ def main():
         st.markdown("""
         <div class="header-banner">
             <h1>📊 Informe Interactivo Diagnóstico EAMH</h1>
-            <p>Ciclo 1 &nbsp;·&nbsp; I.E. Felipe de Restrepo &nbsp;·&nbsp; Aprendizaje Autónomo</p>
+            <p>Ciclo 1 &nbsp;·&nbsp; Múltiples Instituciones &nbsp;·&nbsp; Aprendizaje Autónomo</p>
         </div>""", unsafe_allow_html=True)
     st.divider()
 
